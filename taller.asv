@@ -1,0 +1,40 @@
+
+win_size = 256;
+win_inc = 128; % training data has 50% overlap between windows
+
+
+% DATOS DE ENTRENAMIENTO
+
+[training_data,training_motion,training_index] = load_data('s4t1');
+feature_training = extract_feature(training_data,win_size,win_inc);
+class_training = getclass(training_data,training_motion,training_index,win_size,win_inc);
+[feature_training,class_training] = remove_transitions(feature_training,class_training);
+
+% DATOS DE PRUEBA
+[testing_data,testing_motion,testing_index] = load_data('s4t3');
+win_inc = 32; % testing data has 87.5% overlap between windows
+feature_testing = extract_feature(testing_data,win_size,win_inc);
+class_testing = getclass(testing_data,testing_motion,testing_index,win_size,win_inc);
+%% SEGUNDO CLASIFICADOR
+addpath('C:\MATLAB2018\MATLAB\mcode\BioMedicine\prtools')
+ %% EXPORTACION DE CONJUNTO DE DATOS
+% A = prdataset (DATA, LABELS)
+%   DATA : Tamaño [M,K], M datavectores de tamaño K 
+%   LABELS: Tamaño [M,N], Array para M datavectores
+%   featlab: size [K,F] array with labels for the K features%% NORMALIZACION
+%Dataset = normc(training_data);
+lista_feasures = char('Vrms_E1','Vrms_E','AR2','AR3','AR4');
+DatasetTotal = prdataset(feasure_training, class_training,'featlab',lista_feasures);
+
+%% SELECCION DE CARACTERISTICAS
+%   featselm(TrainingSet,Criterium, Method, Number of Feasures)
+%   Method NN : DEFAULT
+% 	Ws: Feature selection mapping
+%   R: Matrix with step by step results
+
+No_feasures = 5;                                        % Atributos Seleccionados
+[Ws,Rs] = featselm(DatasetTotal,'NN','ind',No_feasures); % Feasure Selection map
+DatasetTotal = DatasetTotal*Ws;                          % Map According to Attibutes selected
+DatasetTotal.featlab
+
+
